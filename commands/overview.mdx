@@ -1,0 +1,108 @@
+---
+title: Command overview
+description: Learn how to use commands in OMNI, The Everything CLI for managing your life from the terminal
+---
+
+## What are commands?
+
+Commands in OMNI are special instructions that start with a forward slash (`/`) and control various aspects of the CLI. They provide core functionality like getting help, checking version information, and managing the interface.
+
+## How to use commands
+
+To use a command, simply type it at the OMNI prompt and press Enter:
+
+```bash
+omni > /help
+```
+
+Commands are:
+- **Case-insensitive** — `/HELP`, `/help`, and `/Help` all work the same way
+- **Autocomplete-enabled** — Start typing a command and press Tab to autocomplete
+- **Simple** — No complex flags or arguments needed
+
+## Command autocomplete
+
+OMNI features intelligent command autocomplete to help you work faster:
+
+<Steps>
+  <Step title="Start typing a command">
+    Begin typing any command at the prompt, like `/he`
+  </Step>
+  
+  <Step title="See suggestions">
+    OMNI will show matching commands in a dropdown below your input
+  </Step>
+  
+  <Step title="Tab to complete">
+    Press Tab to autocomplete the first matching command
+  </Step>
+</Steps>
+
+<Tip>
+  The autocomplete dropdown shows up to 5 matching commands at a time, with ghost text showing the completion inline.
+</Tip>
+
+## Available commands
+
+Here's the complete list of commands available in OMNI:
+
+| Command | Description |
+|---------|-------------|
+| `/help` | Display the help menu with all available commands |
+| `/clear` | Clear the screen and show the welcome message |
+| `/version` | Show the current version of OMNI |
+| `/about` | Learn more about what OMNI is and what it can do |
+| `/exit` | Quit the CLI (aliases: `/quit`, `/q`) |
+
+## Command structure
+
+All commands in OMNI follow a simple structure:
+
+```bash
+/<command-name>
+```
+
+There are no subcommands, flags, or arguments for the built-in commands. This keeps the interface clean and easy to use.
+
+<Note>
+  Unknown commands will display an error message and suggest using `/help` to see available commands.
+</Note>
+
+## Error handling
+
+If you type a command that doesn't exist, OMNI will let you know:
+
+```bash
+omni > /unknown
+
+  Unknown command: "/unknown"
+  Type /help to see available commands.
+```
+
+The CLI remains active after an error, so you can immediately try another command.
+
+## Next steps
+
+Explore each command in detail:
+
+<CardGroup cols={2}>
+  <Card title="/help" icon="circle-question" href="/commands/help">
+    Get help and see all commands
+  </Card>
+  
+  <Card title="/clear" icon="broom" href="/commands/clear">
+    Clear the screen
+  </Card>
+  
+  <Card title="/version" icon="tag" href="/commands/version">
+    Check your version
+  </Card>
+  
+  <Card title="/about" icon="circle-info" href="/commands/about">
+    Learn about OMNI
+  </Card>
+  
+  <Card title="/exit" icon="right-from-bracket" href="/commands/exit">
+    Exit the CLI
+  </Card>
+</CardGroup>

@@ -1,0 +1,132 @@
+---
+title: Contributing
+description: Learn how to contribute code, report issues, and help improve the OMNI CLI
+---
+
+OMNI is an open source project, and contributions are welcome. Whether you're fixing bugs, adding features, or improving documentation, your help makes OMNI better for everyone.
+
+## Ways to contribute
+
+You can contribute to OMNI in several ways:
+
+- **Report bugs** — If something isn't working, open an issue with details about what happened
+- **Suggest features** — Share ideas for new commands or capabilities
+- **Write code** — Fix bugs, implement features, or improve performance
+- **Improve docs** — Help make the documentation clearer and more useful
+
+## Setting up your development environment
+
+Before you start coding, set up OMNI locally:
+
+```bash
+# Fork the repository on GitHub, then clone your fork
+git clone https://github.com/YOUR_USERNAME/The_Everything_Cli.git
+cd The_Everything_Cli
+
+# Install dependencies
+npm install
+
+# Link the CLI globally for testing
+npm link
+
+# Run OMNI from anywhere
+omni
+```
+
+You can now make changes to the codebase and test them immediately by running `omni`.
+
+## Development workflow
+
+Follow this workflow when contributing code:
+
+### 1. Create a branch
+
+Create a new branch for your work. Use a descriptive name that explains what you're building:
+
+```bash
+git checkout -b add-task-command
+```
+
+### 2. Make your changes
+
+Write your code, following these guidelines:
+
+- **Keep it simple** — OMNI values clarity over cleverness
+- **Match the style** — Follow the existing code patterns and formatting
+- **Test thoroughly** — Make sure your changes work and don't break existing features
+- **Write clear commits** — Use descriptive commit messages that explain why, not just what
+
+### 3. Test your changes
+
+Before submitting, verify that:
+
+- The CLI still launches without errors
+- Your new feature or fix works as expected
+- Existing commands still work correctly
+- Your code handles edge cases and errors gracefully
+
+### 4. Commit your work
+
+Commit your changes with clear, descriptive messages:
+
+```bash
+git add .
+git commit -m "Add task management command"
+```
+
+### 5. Push to your fork
+
+Push your branch to your GitHub fork:
+
+```bash
+git push origin add-task-command
+```
+
+### 6. Open a pull request
+
+Go to the original OMNI repository on GitHub and open a pull request from your branch. In your PR description:
+
+- Explain what you changed and why
+- Link to any related issues
+- Describe how you tested your changes
+- Include screenshots or examples if relevant
+
+## Code review process
+
+After you submit a pull request:
+
+1. A maintainer will review your code
+2. They may request changes or ask questions
+3. You can push additional commits to address feedback
+4. Once approved, your code will be merged
+
+## Reporting issues
+
+If you find a bug or have a feature request, open an issue on GitHub. Include:
+
+- **Clear description** — Explain what's wrong or what you'd like to see
+- **Steps to reproduce** — For bugs, list the exact steps that trigger the issue
+- **Expected behavior** — What should have happened?
+- **Actual behavior** — What actually happened?
+- **Environment details** — Your OS, Node version, and OMNI version
+
+## Code style guidelines
+
+When writing code for OMNI:
+
+- Use clear, descriptive variable names
+- Keep functions small and focused
+- Add comments for complex logic
+- Follow JavaScript/Node.js best practices
+- Maintain consistent indentation (2 spaces)
+
+## Project philosophy
+
+As you contribute, keep OMNI's core philosophy in mind:
+
+- **Terminal-first** — Everything should work from the command line
+- **Fast and lightweight** — No unnecessary dependencies or bloat
+- **Offline-capable** — Features should work without internet when possible
+- **Distraction-free** — Keep the interface clean and focused
+
+Your contributions help make OMNI a better tool for everyone who lives in the terminal. Thank you for being part of the project.

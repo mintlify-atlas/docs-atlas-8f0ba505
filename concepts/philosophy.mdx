@@ -1,0 +1,131 @@
+---
+title: Philosophy
+description: Why OMNI is terminal-first and how it helps you focus on what matters
+---
+
+## Terminal-first by design
+
+OMNI exists because of a simple observation: if you live in the terminal, your productivity tools should too.
+
+Most developers, sysadmins, and power users spend their entire day in a terminal window. They write code there. They manage infrastructure there. They debug production issues there. But the moment they need to check a task, write a note, or review their calendar, they're forced to leave.
+
+That context switch is expensive. Not just in time—though switching apps does cost seconds you'll never get back—but in mental overhead. Every time you leave your focused workspace, you risk getting pulled into something else. A notification. A message. An email. Suddenly, the thing you meant to do takes ten times longer.
+
+OMNI eliminates that entirely. Everything you need is accessible through the same interface you're already using.
+
+<Tip>
+The fastest way to do something is to never leave the environment where you're already working.
+</Tip>
+
+## Focus and flow
+
+The terminal is inherently distraction-free. There are no flashy animations, no notification badges, no infinite scroll. Just text and a cursor. This creates an environment conducive to deep work.
+
+OMNI leans into this. When you launch it, you see:
+
+1. A gradient logo (purple to cyan, generated via RGB interpolation)
+2. A tagline: "Operate your life through the command line"
+3. Two hints: type `/help` or `/exit`
+4. A prompt
+
+That's it. No dashboard cluttered with widgets. No sidebar full of links. Just the information you need to get started, and nothing else.
+
+```javascript
+// From src/screen.js:26
+function printWelcome() {
+  console.clear();
+  
+  LOGO_LINES.forEach((line, index) => {
+    const factor = LOGO_LINES.length > 1 ? index / (LOGO_LINES.length - 1) : 0;
+    const [r, g, b] = interpolateColor(cosmicPurple, cosmicCyan, factor);
+    console.log(chalk.rgb(r, g, b).bold(line));
+  });
+
+  console.log(chalk.gray('  Operate your life through the command line.\n'));
+  console.log(chalk.gray('  Type ') + chalk.white('/help') + chalk.gray(' to see available commands.'));
+  console.log(chalk.gray('  Type ') + chalk.white('/exit') + chalk.gray(' to quit.\n'));
+}
+```
+
+This minimalism is intentional. OMNI respects your attention.
+
+## Single interface, zero fragmentation
+
+Most people's productivity stack is fractured:
+
+- Tasks in Todoist or Things
+- Notes in Notion or Obsidian
+- Calendar in Google Calendar or Outlook
+- Finances in Excel or some budgeting app
+- Habits tracked on paper or in yet another app
+
+Each tool has its own interface, its own login, its own quirks. You spend more time managing tools than actually getting things done.
+
+OMNI inverts this. One interface. One prompt. One command away from anything you need.
+
+This isn't about replacing every app on your phone. It's about consolidating the core workflows that matter—the ones you interact with daily—into a single, fast, friction-free environment.
+
+<Warning>
+OMNI is not for everyone. If you don't already spend significant time in the terminal, this probably isn't the right tool for you. But if you do, it might change how you work.
+</Warning>
+
+## Command-driven interaction
+
+Graphical interfaces force you to navigate menus, click buttons, and hunt for options. Commands let you express intent directly.
+
+Want to add a task? Type `/task add Buy groceries`.
+
+Want to see your calendar? Type `/cal today`.
+
+Want to start a focus session? Type `/pomodoro start`.
+
+No navigation. No hunting. Just clear, direct commands that execute immediately.
+
+OMNI's command system is built on this principle. Every action you might want to take has a corresponding command. As you use OMNI, you'll build muscle memory for these commands, making them faster than any point-and-click interface could ever be.
+
+### Autocomplete as a learning tool
+
+OMNI includes intelligent autocomplete powered by Node.js's readline completer (see `src/app.js:52`). As you type a command, OMNI shows:
+
+1. **Ghost text**: A grayed-out suggestion of the first matching command
+2. **Dropdown**: A list of all matching commands below the prompt
+
+This serves two purposes:
+
+- **Speed**: You can type `/h` and hit Tab to complete `/help`
+- **Discovery**: You see what commands exist without needing to memorize everything
+
+```javascript
+// From src/app.js:52
+completer: (line) => {
+  const hits = COMMANDS.filter((c) => c.startsWith(line));
+  return [hits.length ? hits : COMMANDS, line];
+}
+```
+
+<Note>
+The autocomplete dropdown clears intelligently on keypress events (see `src/app.js:102`) to avoid visual clutter. This attention to detail makes the interface feel polished.
+</Note>
+
+## Built for longevity
+
+OMNI uses minimal dependencies (just `chalk` for colors and `prompts` for future interactive features) and relies on Node.js's built-in `readline` module for input handling. This means:
+
+- No massive dependency tree that breaks every six months
+- No framework lock-in
+- No build step or compilation
+- No risk of the tool becoming unmaintained because a VC-funded startup shut down
+
+You can clone the repository, run `npm install`, and it just works. Five years from now, it will still work.
+
+This is software built to last.
+
+## Extensibility through simplicity
+
+Because OMNI is just JavaScript and uses straightforward patterns (a switch statement for routing, separate functions for each screen), extending it is trivial.
+
+Want to add a new command? Add a case to the switch in `src/app.js:21`. Want to change the color scheme? Edit the RGB values in `src/screen.js:23`. Want to add a database for tasks? Require it in `app.js` and call it from your command handler.
+
+No plugins. No hooks. No abstractions. Just code that does what it says.
+
+This simplicity makes OMNI approachable for contributions and customization. You're not fighting a framework—you're reading and writing straightforward JavaScript.

@@ -1,0 +1,130 @@
+---
+title: /exit command
+description: Quit OMNI and return to your regular terminal prompt
+---
+
+## Overview
+
+The `/exit` command closes OMNI and returns you to your regular terminal prompt. It's the graceful way to end your OMNI session.
+
+## Usage
+
+```bash
+omni > /exit
+```
+
+No arguments or flags are needed — just type the command and press Enter.
+
+## Aliases
+
+The `/exit` command has two convenient aliases:
+
+- `/quit` — Full word alternative to exit
+- `/q` — Quick single-letter shortcut
+
+All three commands do exactly the same thing:
+
+```bash
+omni > /quit    # Same as /exit
+omni > /q       # Same as /exit
+```
+
+<Tip>
+  Use `/q` for the fastest way to exit OMNI — it's especially handy when you're in a hurry.
+</Tip>
+
+## Output
+
+When you exit OMNI, you'll see a friendly goodbye message:
+
+```bash
+omni > /exit
+
+  See you later. ✌
+```
+
+After the message appears, OMNI closes and returns you to your normal terminal prompt.
+
+## Alternative ways to exit
+
+Besides using the `/exit` command, you can also quit OMNI using:
+
+- **Ctrl+C** — Send an interrupt signal (immediate exit)
+- **Ctrl+D** — Send EOF signal (end of input)
+
+These standard terminal shortcuts work as expected, but using `/exit` provides the cleanest exit with a goodbye message.
+
+## When to use /exit
+
+Use the `/exit` command when you:
+
+- Are done working in OMNI for now
+- Want to return to your regular shell prompt
+- Need to run commands outside of OMNI
+- Are closing your terminal session
+
+<Note>
+  Exiting OMNI doesn't delete any data or lose your work — when you start OMNI again, everything will be as you left it.
+</Note>
+
+## Implementation details
+
+The `/exit` command and its aliases are handled in src/app.js:34-38:
+
+```javascript
+case '/exit':
+case '/quit':
+case '/q':
+  printGoodbye();
+  return false;
+```
+
+Notice that all three aliases are grouped together in a switch case fallthrough pattern. The command:
+
+1. Calls `printGoodbye()` to display the farewell message
+2. Returns `false` to signal the app should stop running
+
+The `printGoodbye` function (src/screen.js:70-72) displays the farewell:
+
+```javascript
+function printGoodbye() {
+  console.log(chalk.cyan('\n  See you later. ✌\n'));
+}
+```
+
+### The exit flow
+
+When the `handleCommand` function returns `false`, the readline interface is closed (src/app.js:113-120):
+
+```javascript
+rl.on('line', (line) => {
+  const keepRunning = handleCommand(line);
+  if (keepRunning) {
+    rl.prompt();
+  } else {
+    rl.close();
+  }
+});
+
+rl.on('close', () => {
+  process.exit(0);
+});
+```
+
+This ensures:
+- The goodbye message is displayed
+- The readline interface is properly closed
+- The process exits cleanly with status code 0
+
+## Process exit code
+
+OMNI exits with status code `0`, which indicates successful termination. This is important for:
+
+- Shell scripts that might run OMNI
+- CI/CD pipelines that need to check exit status
+- Proper terminal behavior and history
+
+## Related commands
+
+- [/clear](/commands/clear) — Clear the screen without exiting
+- [/help](/commands/help) — See all available commands before you go

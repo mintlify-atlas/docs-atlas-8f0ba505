@@ -1,0 +1,101 @@
+---
+title: Overview
+description: Understand how OMNI brings your entire life into a single terminal interface
+---
+
+## What is OMNI?
+
+OMNI is a unified terminal interface designed to operate your entire life from one place. Instead of scattering your attention across dozens of apps—tasks here, notes there, calendars somewhere else—OMNI consolidates everything into the environment where you already work: your terminal.
+
+## The core concept
+
+You type `omni` from anywhere on your system, and you enter a persistent command interface. This isn't a collection of separate CLI tools you invoke individually. It's a single, always-available shell where you manage everything that matters.
+
+```bash
+omni
+```
+
+Once launched, you're greeted with the OMNI prompt:
+
+```text
+  omni > 
+```
+
+From here, you execute commands that control different aspects of your life—all without leaving the terminal.
+
+<Note>
+OMNI uses Node.js's `readline` module to create an interactive prompt with autocomplete, command history, and a custom refresh cycle. This gives you a seamless command-line experience.
+</Note>
+
+## How it works
+
+OMNI operates on a simple but powerful model:
+
+1. **Single entry point**: The `omni` command launches the application from anywhere
+2. **Command-based interface**: Everything you do is a command (like `/help` or `/tasks`)
+3. **Persistent session**: The shell stays open until you exit, maintaining context
+4. **No context switching**: You never leave your terminal to get things done
+
+### Built-in commands
+
+OMNI comes with core commands that control the interface itself:
+
+| Command | Purpose |
+|---------|----------|
+| `/help` | Display available commands |
+| `/about` | Learn what OMNI is |
+| `/version` | Show current version |
+| `/clear` | Clear the screen and redisplay the welcome |
+| `/exit` | Quit the application |
+
+### Command routing
+
+Every input you type goes through the command handler in `src/app.js:16`. The handler:
+
+1. Trims and normalizes your input
+2. Matches it against known commands using a switch statement
+3. Executes the corresponding function from `screen.js`
+4. Returns whether the session should continue
+
+```javascript
+function handleCommand(input) {
+  const cmd = input.trim().toLowerCase();
+
+  if (!cmd) return true;
+
+  switch (cmd) {
+    case '/help':
+      printHelp();
+      return true;
+    case '/exit':
+    case '/quit':
+    case '/q':
+      printGoodbye();
+      return false;
+    // ... more commands
+  }
+}
+```
+
+<Tip>
+The handler returns a boolean to indicate whether the readline loop should continue. This pattern makes it easy to add new commands without managing complex state.
+</Tip>
+
+## What's coming
+
+The current version establishes the foundation—the shell, the prompt, the command router. The roadmap includes:
+
+- **Tasks & todos**: Manage your day without leaving the terminal
+- **Quick notes**: Capture thoughts instantly
+- **Habit tracking**: Streaks and accountability, CLI-style
+- **Finance snapshots**: Know where your money went
+- **Calendar integration**: See what's next without opening anything
+- **Pomodoro timer**: Built-in focus sessions
+
+Each of these will be a command namespace within OMNI, accessed through the same prompt you're already using.
+
+## Why this matters
+
+If you live in the terminal—writing code, managing servers, running scripts—then context switching to web apps and mobile interfaces breaks your flow. OMNI eliminates that friction by bringing everything to you, right where you already are.
+
+No browser tabs. No notification hell. Just you and a blinking cursor, getting things done.

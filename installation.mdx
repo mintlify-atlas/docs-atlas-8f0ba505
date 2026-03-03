@@ -1,0 +1,238 @@
+---
+title: Installation
+description: Install OMNI and get it running on your machine in under 2 minutes.
+---
+
+## Prerequisites
+
+Before installing OMNI, make sure you have Node.js installed on your system.
+
+<CodeGroup>
+
+```bash macOS
+# Using Homebrew
+brew install node
+
+# Verify installation
+node --version
+npm --version
+```
+
+```bash Linux
+# Using apt (Ubuntu/Debian)
+sudo apt update
+sudo apt install nodejs npm
+
+# Using dnf (Fedora)
+sudo dnf install nodejs npm
+
+# Verify installation
+node --version
+npm --version
+```
+
+```bash Windows
+# Using Chocolatey
+choco install nodejs
+
+# Or download from nodejs.org
+# https://nodejs.org/
+
+# Verify installation
+node --version
+npm --version
+```
+
+</CodeGroup>
+
+<Tip>
+  OMNI requires Node.js version 12 or higher. Run `node --version` to check your current version.
+</Tip>
+
+## Install OMNI
+
+There are two ways to install OMNI: from source (recommended for now) or via npm (coming soon).
+
+<Tabs>
+  <Tab title="From source">
+    <Steps>
+      <Step title="Clone the repository">
+        First, clone the OMNI repository to your local machine:
+
+        ```bash
+        git clone https://github.com/dvelkow/The_Everything_Cli.git
+        cd The_Everything_Cli
+        ```
+      </Step>
+
+      <Step title="Install dependencies">
+        Install the required npm packages:
+
+        ```bash
+        npm install
+        ```
+
+        This installs two core dependencies:
+        - **chalk** (v4.1.2) - For beautiful terminal colors and gradients
+        - **prompts** (v2.4.2) - For interactive command-line prompts
+      </Step>
+
+      <Step title="Link the CLI globally">
+        Make the `omni` command available system-wide:
+
+        ```bash
+        npm link
+        ```
+
+        This creates a symbolic link in your global `node_modules` directory, allowing you to run `omni` from anywhere.
+
+        <Note>
+          On some systems, you may need to use `sudo npm link` if you encounter permission errors.
+        </Note>
+      </Step>
+
+      <Step title="Verify the installation">
+        Test that OMNI is installed correctly:
+
+        ```bash
+        omni
+        ```
+
+        You should see the OMNI welcome screen with the cosmic gradient logo:
+
+        ```text
+          ✵             ██████   ███    ███  ███    ██  ██████           ✵    
+          ✵ ✵          ██    ██  ████  ████  ████   ██    ██           ✵ ✵    
+          ✵ ✵ ✵        ██    ██  ██ ████ ██  ██ ██  ██    ██         ✵ ✵ ✵    
+          ✵ ✵          ██    ██  ██  ██  ██  ██  ██ ██    ██           ✵ ✵    
+          ✵             ██████   ██      ██  ██   ████  ██████           ✵    
+
+                                  THE EVERYTHING CLI
+
+          Operate your life through the command line.
+
+          Type /help to see available commands.
+          Type /exit to quit.
+
+          omni > 
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Via npm (coming soon)">
+    Once OMNI is published to npm, you'll be able to install it globally with a single command:
+
+    ```bash
+    npm install -g the-everything-cli
+    ```
+
+    <Warning>
+      This installation method is not yet available. Please use the "From source" installation method for now.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found: omni">
+    If you see this error after running `npm link`, it means your npm global bin directory isn't in your PATH.
+
+    **Fix for macOS/Linux:**
+    ```bash
+    # Find your npm global bin directory
+    npm config get prefix
+
+    # Add it to your PATH (add this to ~/.bashrc or ~/.zshrc)
+    export PATH="$(npm config get prefix)/bin:$PATH"
+
+    # Reload your shell
+    source ~/.bashrc  # or source ~/.zshrc
+    ```
+
+    **Fix for Windows:**
+    The npm global bin directory should be at `%APPDATA%\npm`. Add it to your PATH environment variable through System Properties.
+  </Accordion>
+
+  <Accordion title="Permission denied errors">
+    If you encounter permission errors during `npm link`, you have two options:
+
+    **Option 1: Use sudo (not recommended)**
+    ```bash
+    sudo npm link
+    ```
+
+    **Option 2: Fix npm permissions (recommended)**
+    ```bash
+    # Create a directory for global packages
+    mkdir ~/.npm-global
+
+    # Configure npm to use the new directory
+    npm config set prefix '~/.npm-global'
+
+    # Add the bin directory to your PATH
+    echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+    source ~/.bashrc
+
+    # Try npm link again
+    npm link
+    ```
+  </Accordion>
+
+  <Accordion title="Colors not displaying correctly">
+    OMNI uses 24-bit true color for its gradients. If you see garbled text or incorrect colors:
+
+    - Make sure your terminal supports true color (most modern terminals do)
+    - Try a different terminal emulator (iTerm2, Hyper, Windows Terminal, Alacritty)
+    - Check your `TERM` environment variable: `echo $TERM`
+
+    Recommended `TERM` values:
+    - `xterm-256color`
+    - `screen-256color`
+    - `tmux-256color`
+  </Accordion>
+
+  <Accordion title="Node.js version issues">
+    OMNI requires Node.js 12 or higher because it uses modern JavaScript features.
+
+    Check your version:
+    ```bash
+    node --version
+    ```
+
+    If you need to upgrade:
+    ```bash
+    # Using nvm (recommended)
+    nvm install --lts
+    nvm use --lts
+
+    # Or download from nodejs.org
+    # https://nodejs.org/
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Uninstallation
+
+If you need to uninstall OMNI:
+
+<Steps>
+  <Step title="Unlink the global command">
+    ```bash
+    cd The_Everything_Cli
+    npm unlink
+    ```
+  </Step>
+
+  <Step title="Remove the repository">
+    ```bash
+    cd ..
+    rm -rf The_Everything_Cli
+    ```
+  </Step>
+</Steps>
+
+## Next steps
+
+Now that OMNI is installed, head over to the [quickstart guide](/quickstart) to run your first commands and learn the workflow.

@@ -1,0 +1,99 @@
+---
+title: /clear command
+description: Clear the terminal screen and redisplay the OMNI welcome message with the ASCII logo
+---
+
+## Overview
+
+The `/clear` command clears your terminal screen and redisplays the OMNI welcome message, giving you a fresh, clean workspace.
+
+## Usage
+
+```bash
+omni > /clear
+```
+
+No arguments or flags are needed — just type the command and press Enter.
+
+## Output
+
+When you run `/clear`, your screen is cleared and you'll see the welcome display:
+
+```bash
+  ✵             ██████   ███    ███  ███    ██  ██████           ✵    
+  ✵ ✵          ██    ██  ████  ████  ████   ██    ██           ✵ ✵    
+  ✵ ✵ ✵        ██    ██  ██ ████ ██  ██ ██  ██    ██         ✵ ✵ ✵    
+  ✵ ✵          ██    ██  ██  ██  ██  ██  ██ ██    ██           ✵ ✵    
+  ✵             ██████   ██      ██  ██   ████  ██████           ✵    
+
+                          THE EVERYTHING CLI
+
+  Operate your life through the command line.
+
+  Type /help to see available commands.
+  Type /exit to quit.
+```
+
+The ASCII logo features a beautiful gradient from cosmic purple to cyan, creating a visually striking header.
+
+## When to use /clear
+
+Use the `/clear` command when you:
+
+- Want to declutter your terminal after running many commands
+- Need a fresh visual start for a new task
+- Want to see the OMNI logo and welcome message again
+- Feel overwhelmed by command history on screen
+
+<Tip>
+  Unlike a regular terminal clear, `/clear` redisplays the welcome message, keeping you oriented in the OMNI interface.
+</Tip>
+
+## How it works
+
+The `/clear` command doesn't just clear the screen — it calls the same welcome function that runs when OMNI starts.
+
+### Implementation
+
+The command is handled in src/app.js:25-27:
+
+```javascript
+case '/clear':
+  printWelcome();
+  return true;
+```
+
+The `printWelcome` function (src/screen.js:26-38) performs several actions:
+
+1. Clears the console with `console.clear()`
+2. Renders the ASCII logo with a gradient effect
+3. Displays helpful text about available commands
+
+```javascript
+function printWelcome() {
+  console.clear();
+  
+  LOGO_LINES.forEach((line, index) => {
+    const factor = LOGO_LINES.length > 1 ? index / (LOGO_LINES.length - 1) : 0;
+    const [r, g, b] = interpolateColor(cosmicPurple, cosmicCyan, factor);
+    console.log(chalk.rgb(r, g, b).bold(line));
+  });
+
+  console.log(chalk.gray('  Operate your life through the command line.\n'));
+  console.log(chalk.gray('  Type ') + chalk.white('/help') + chalk.gray(' to see available commands.'));
+  console.log(chalk.gray('  Type ') + chalk.white('/exit') + chalk.gray(' to quit.\n'));
+}
+```
+
+### The gradient effect
+
+The logo uses RGB color interpolation between cosmic purple `[138, 43, 226]` and cyan `[0, 255, 255]` to create a smooth gradient from top to bottom.
+
+<Note>
+  The welcome message is also displayed automatically when you first start OMNI.
+</Note>
+
+## Related commands
+
+- [/exit](/commands/exit) — Close OMNI and return to your terminal
+- [/help](/commands/help) — See available commands without clearing the screen

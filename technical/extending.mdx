@@ -1,0 +1,234 @@
+---
+title: Extending OMNI
+description: Learn how to add new commands, modify the command router, and extend OMNI's functionality
+---
+
+OMNI is designed to be extensible. This guide walks through adding new commands to the CLI.
+
+## Understanding the command system
+
+Commands in OMNI follow a simple pattern:
+1. Commands are defined in the `COMMANDS` array for autocomplete
+2. The `handleCommand` function routes commands to their handlers
+3. Screen functions in `screen.js` handle the display logic
+
+## Adding a new command
+
+Let's add a `/status` command that displays system information. This requires changes to three parts of the codebase.
+
+### Step 1: Register the command
+
+Add your command to the `COMMANDS` array in `app.js:14`:
+
+```javascript
+const COMMANDS = [
+  '/help',
+  '/clear',
+  '/version',
+  '/about',
+  '/status',  // New command
+  '/exit',
+  '/quit'
+];
+```
+
+This enables autocomplete and dropdown suggestions for your new command.
+
+### Step 2: Create a display function
+
+Add a display function to `screen.js`. This keeps presentation logic separate from routing:
+
+```javascript
+function printStatus() {
+  console.log('');
+  console.log(chalk.cyan.bold('  System Status'));
+  console.log('');
+  console.log(chalk.white('  Platform: ') + chalk.gray(process.platform));
+  console.log(chalk.white('  Node:     ') + chalk.gray(process.version));
+  console.log(chalk.white('  Uptime:   ') + chalk.gray(`${process.uptime().toFixed(2)}s`));
+  console.log('');
+}
+```
+
+Don't forget to export it in the module.exports at the bottom of `screen.js`:
+
+```javascript
+module.exports = {
+  printWelcome,
+  printHelp,
+  printAbout,
+  printVersion,
+  printUnknown,
+  printGoodbye,
+  printStatus,  // Add your new function
+};
+```
+
+### Step 3: Add routing logic
+
+Import your display function in `app.js:3-10`:
+
+```javascript
+const {
+  printWelcome,
+  printHelp,
+  printAbout,
+  printVersion,
+  printUnknown,
+  printGoodbye,
+  printStatus,  // Import your new function
+} = require('./screen');
+```
+
+Then add a case to the switch statement in `handleCommand` (`app.js:16-43`):
+
+```javascript
+function handleCommand(input) {
+  const cmd = input.trim().toLowerCase();
+
+  if (!cmd) return true;
+
+  switch (cmd) {
+    case '/help':
+      printHelp();
+      return true;
+    case '/clear':
+      printWelcome();
+      return true;
+    case '/version':
+      printVersion();
+      return true;
+    case '/about':
+      printAbout();
+      return true;
+    case '/status':  // Add your case
+      printStatus();
+      return true;
+    case '/exit':
+    case '/quit':
+    case '/q':
+      printGoodbye();
+      return false;
+    default:
+      printUnknown(cmd);
+      return true;
+  }
+}
+```
+
+## Adding commands with arguments
+
+For commands that accept arguments, you'll need to parse the input string. Here's an example `/echo` command:
+
+```javascript
+function handleCommand(input) {
+  const trimmed = input.trim();
+  const cmd = trimmed.toLowerCase().split(' ')[0];
+  const args = trimmed.slice(cmd.length).trim();
+
+  if (!cmd) return true;
+
+  switch (cmd) {
+    // ... existing cases ...
+    
+    case '/echo':
+      printEcho(args);
+      return true;
+    
+    // ... rest of cases ...
+  }
+}
+```
+
+And the corresponding display function:
+
+```javascript
+function printEcho(text) {
+  if (!text) {
+    console.log(chalk.red('\n  Error: /echo requires text to echo\n'));
+    return;
+  }
+  console.log(chalk.cyan(`\n  ${text}\n`));
+}
+```
+
+## Adding subcommands
+
+For more complex command structures, you can implement subcommands by extending the parsing logic:
+
+```javascript
+function handleCommand(input) {
+  const trimmed = input.trim();
+  const parts = trimmed.toLowerCase().split(' ');
+  const cmd = parts[0];
+  const subCmd = parts[1];
+  const args = trimmed.slice(cmd.length + (subCmd ? subCmd.length + 1 : 0)).trim();
+
+  if (!cmd) return true;
+
+  switch (cmd) {
+    case '/task':
+      return handleTaskCommand(subCmd, args);
+    // ... other cases ...
+  }
+}
+
+function handleTaskCommand(subCmd, args) {
+  switch (subCmd) {
+    case 'add':
+      addTask(args);
+      return true;
+    case 'list':
+      listTasks();
+      return true;
+    case 'done':
+      markTaskDone(args);
+      return true;
+    default:
+      console.log(chalk.red('\n  Unknown task subcommand. Try /task list, /task add, or /task done\n'));
+      return true;
+  }
+}
+```
+
+For subcommands, you'll want to add all variations to the `COMMANDS` array:
+
+```javascript
+const COMMANDS = [
+  '/task add',
+  '/task list',
+  '/task done',
+  // ... other commands
+];
+```
+
+## Updating the help text
+
+Whenever you add a new command, update the `printHelp` function in `screen.js` to document it:
+
+```javascript
+function printHelp() {
+  console.log('');
+  console.log(chalk.cyan.bold('  Available commands:'));
+  console.log('');
+  console.log(chalk.white('  /help    ') + chalk.gray('— Show this help menu'));
+  console.log(chalk.white('  /clear   ') + chalk.gray('— Clear the screen'));
+  console.log(chalk.white('  /version ') + chalk.gray('— Show current version'));
+  console.log(chalk.white('  /about   ') + chalk.gray('— What is OMNI?'));
+  console.log(chalk.white('  /status  ') + chalk.gray('— Show system status'));  // Add your command
+  console.log(chalk.white('  /exit    ') + chalk.gray('— Quit the CLI'));
+  console.log('');
+}
+```
+
+## Best practices
+
+**Separation of concerns** - Keep display logic in `screen.js` and routing logic in `app.js`. This makes the code easier to maintain and test.
+
+**Consistent styling** - Use the same color scheme as existing commands (cyan for headers, white for labels, gray for values).
+
+**Return values** - Always return a boolean from command handlers. Return `true` to continue the REPL, `false` to exit.
+
+**Input validation** - Validate arguments and provide helpful error messages when commands are used incorrectly.
+
+**Empty lines** - Add empty lines before and after command output (using `\n`) to maintain visual spacing consistent with existing commands.

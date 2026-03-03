@@ -1,80 +1,325 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get started with OMNI in 5 minutes. Learn the core commands and workflow.
 ---
 
-## Get started in three steps
+## Launch OMNI
 
-Get your documentation site running locally and make your first customization.
+After [installation](/installation), launch OMNI from anywhere in your terminal:
 
-### Step 1: Set up your local environment
+```bash
+omni
+```
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+You'll see the welcome screen with the cosmic gradient logo and prompt:
+
+```text
+  ✵             ██████   ███    ███  ███    ██  ██████           ✵    
+  ✵ ✵          ██    ██  ████  ████  ████   ██    ██           ✵ ✵    
+  ✵ ✵ ✵        ██    ██  ██ ████ ██  ██ ██  ██    ██         ✵ ✵ ✵    
+  ✵ ✵          ██    ██  ██  ██  ██  ██  ██ ██    ██           ✵ ✵    
+  ✵             ██████   ██      ██  ██   ████  ██████           ✵    
+
+                          THE EVERYTHING CLI
+
+  Operate your life through the command line.
+
+  Type /help to see available commands.
+  Type /exit to quit.
+
+  omni > 
+```
+
+<Tip>
+  The prompt color is a beautiful cosmic purple (RGB: 138, 43, 226). All text output uses a gradient from deep purple to bright cyan.
+</Tip>
+
+## Your first commands
+
+OMNI uses a slash-command syntax. All commands start with `/` to distinguish them from regular input.
+
+<Steps>
+  <Step title="Get help">
+    Start by exploring available commands:
+
+    ```bash
+    omni > /help
+    ```
+
+    Output:
+    ```text
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+      Available commands:
 
-### Step 2: Deploy your changes
+      /help    — Show this help menu
+      /clear   — Clear the screen
+      /version — Show current version
+      /about   — What is OMNI?
+      /exit    — Quit the CLI
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    ```
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    This shows all commands currently available in OMNI. As new features are added (tasks, notes, habits), they'll appear here.
+  </Step>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+  <Step title="Learn about OMNI">
+    Get a quick overview of what OMNI is:
 
-### Step 3: Go live
+    ```bash
+    omni > /about
+    ```
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    Output:
+    ```text
+
+      The EVERYTHING CLI
+      One terminal to run your entire life.
+      Tasks, notes, finances, habits — all from right here.
+      Built for people who live in the terminal.
+
+    ```
+  </Step>
+
+  <Step title="Check the version">
+    See which version you're running:
+
+    ```bash
+    omni > /version
+    ```
+
+    Output:
+    ```text
+
+      omni v0.1.0
+
+    ```
+  </Step>
+
+  <Step title="Clear the screen">
+    Clear the screen and reset to the welcome screen:
+
+    ```bash
+    omni > /clear
+    ```
+
+    This clears the terminal and redisplays the OMNI logo and welcome message. Useful when your screen gets cluttered.
+  </Step>
+</Steps>
+
+## Autocomplete magic
+
+OMNI includes intelligent command autocomplete powered by Node.js readline. As you type, OMNI suggests completions in real-time.
+
+<Steps>
+  <Step title="Start typing a command">
+    Try typing `/h` and you'll see:
+
+    ```bash
+    omni > /help
+            /help
+    ```
+
+    The ghosted text shows the suggested completion, and the dropdown lists all matching commands.
+  </Step>
+
+  <Step title="Navigate suggestions">
+    - Press `Tab` to accept the first suggestion
+    - Keep typing to filter suggestions further
+    - Press `Enter` to execute the command
+  </Step>
+
+  <Step title="Explore all commands">
+    Type just `/` to see all available commands in the dropdown:
+
+    ```bash
+    omni > /
+            /help
+            /clear
+            /version
+            /about
+            /exit
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  The autocomplete system in OMNI is implemented using Node.js readline's `completer` function (src/app.js:52-55). It filters the `COMMANDS` array based on your input.
+</Note>
+
+## Understanding command handling
+
+When you enter a command, OMNI processes it through the command router:
+
+1. **Input normalization** - Your input is trimmed and converted to lowercase (src/app.js:17)
+2. **Command matching** - The router checks the command against available options (src/app.js:21-42)
+3. **Action execution** - The appropriate screen function is called from `screen.js`
+4. **Continue or exit** - Most commands return `true` to keep the prompt active; `/exit` returns `false` to quit
+
+<CodeGroup>
+
+```javascript src/app.js:16-43 (Command Handler)
+function handleCommand(input) {
+  const cmd = input.trim().toLowerCase();
+
+  if (!cmd) return true;
+
+  switch (cmd) {
+    case '/help':
+      printHelp();
+      return true;
+    case '/clear':
+      printWelcome();
+      return true;
+    case '/version':
+      printVersion();
+      return true;
+    case '/about':
+      printAbout();
+      return true;
+    case '/exit':
+    case '/quit':
+    case '/q':
+      printGoodbye();
+      return false;
+    default:
+      printUnknown(cmd);
+      return true;
+  }
+}
+```
+
+```javascript src/screen.js:40-50 (Help Display)
+function printHelp() {
+  console.log('');
+  console.log(chalk.cyan.bold('  Available commands:'));
+  console.log('');
+  console.log(chalk.white('  /help    ') + chalk.gray('— Show this help menu'));
+  console.log(chalk.white('  /clear   ') + chalk.gray('— Clear the screen'));
+  console.log(chalk.white('  /version ') + chalk.gray('— Show current version'));
+  console.log(chalk.white('  /about   ') + chalk.gray('— What is OMNI?'));
+  console.log(chalk.white('  /exit    ') + chalk.gray('— Quit the CLI'));
+  console.log('');
+}
+```
+
+</CodeGroup>
+
+## Try unknown commands
+
+What happens if you type something OMNI doesn't recognize?
+
+```bash
+omni > /tasks
+```
+
+Output:
+```text
+
+  Unknown command: "/tasks"
+  Type /help to see available commands.
+
+```
+
+OMNI gracefully handles unknown commands and guides you back to valid options. This error handling is implemented in `src/app.js:40` and `src/screen.js:65-68`.
+
+<Tip>
+  The `/tasks` command doesn't exist yet, but it's on the roadmap! Check the [introduction](/introduction) to see what features are coming next.
+</Tip>
+
+## Exiting OMNI
+
+When you're done, exit gracefully:
+
+<CodeGroup>
+
+```bash Primary
+omni > /exit
+```
+
+```bash Alternative
+omni > /quit
+```
+
+```bash Shorthand
+omni > /q
+```
+
+</CodeGroup>
+
+Output:
+```text
+
+  See you later. ✌
+
+```
+
+All three commands trigger the same exit handler (src/app.js:34-38) and display a friendly goodbye message.
+
+<Note>
+  You can also exit by pressing `Ctrl+C` or `Ctrl+D`, which triggers the readline `close` event (src/app.js:122-124).
+</Note>
+
+## Architecture overview
+
+Now that you've used OMNI, here's how it works under the hood:
+
+<Steps>
+  <Step title="Entry point (src/index.js)">
+    The shebang `#!/usr/bin/env node` makes the file executable. It simply imports and calls `startApp()` from `app.js`.
+  </Step>
+
+  <Step title="Application shell (src/app.js)">
+    - Creates a readline interface with custom prompt styling
+    - Implements autocomplete with dropdown suggestions
+    - Routes commands to appropriate handlers
+    - Manages the prompt loop and exit conditions
+  </Step>
+
+  <Step title="Display layer (src/screen.js)">
+    - Renders the welcome screen with gradient logo
+    - Provides all command output functions
+    - Uses chalk for color and styling
+    - Implements gradient interpolation for the logo
+  </Step>
+</Steps>
+
+## The gradient effect
+
+OMNI's signature visual is the purple-to-cyan gradient on the logo. Here's how it works:
+
+```javascript src/screen.js:15-24
+const cosmicPurple = [138, 43, 226]; // deep purple
+const cosmicCyan = [0, 255, 255];    // bright cyan
+
+function printWelcome() {
+  console.clear();
+  
+  LOGO_LINES.forEach((line, index) => {
+    const factor = LOGO_LINES.length > 1 ? index / (LOGO_LINES.length - 1) : 0;
+    const [r, g, b] = interpolateColor(cosmicPurple, cosmicCyan, factor);
+    console.log(chalk.rgb(r, g, b).bold(line));
+  });
+```
+
+The `interpolateColor()` function (src/screen.js:15-21) calculates intermediate RGB values between purple and cyan for each line of the logo.
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Command reference" icon="book" href="/commands/overview">
+    Explore all commands in detail with examples
+  </Card>
+  <Card title="Customization" icon="gear" href="/advanced/customization">
+    Customize OMNI's behavior and appearance
+  </Card>
+  <Card title="Contributing" icon="code" href="/roadmap/contributing">
+    Add new commands and extend OMNI
+  </Card>
+  <Card title="Roadmap" icon="map" href="/roadmap/features">
+    See what's coming next for OMNI
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+<Warning>
+  OMNI is in early development (v0.1.0). The core shell is stable, but many planned features (tasks, notes, habits) are not yet implemented.
+</Warning>

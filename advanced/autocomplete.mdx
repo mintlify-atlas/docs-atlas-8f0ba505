@@ -1,0 +1,159 @@
+---
+title: Autocomplete system
+description: Learn how OMNI's intelligent autocomplete system works with inline ghost text and dropdown suggestions
+---
+
+The OMNI CLI includes a sophisticated autocomplete system that provides real-time suggestions as you type. The system combines inline ghost text with a dropdown menu, making command discovery seamless.
+
+## How autocomplete works
+
+The autocomplete system uses Node.js's `readline` module with a custom completer function and an overridden `_refreshLine` method to provide visual feedback.
+
+### Completer function
+
+The completer function filters available commands based on your current input:
+
+```javascript app.js
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  prompt: PROMPT,
+  completer: (line) => {
+    const hits = COMMANDS.filter((c) => c.startsWith(line));
+    return [hits.length ? hits : COMMANDS, line];
+  }
+});
+```
+
+This function:
+- Takes the current line input
+- Filters commands that start with the input text
+- Returns matching commands or all commands if no matches found
+- Enables Tab completion out of the box
+
+## Visual autocomplete implementation
+
+The visual autocomplete system provides two features:
+1. **Ghost text** — Shows the first matching command in gray after your cursor
+2. **Dropdown menu** — Displays up to 5 matching commands below the prompt
+
+### Overriding _refreshLine
+
+The magic happens by overriding readline's internal `_refreshLine` method:
+
+```javascript app.js
+const originalRefresh = rl._refreshLine ? rl._refreshLine.bind(rl) : () => {};
+
+let lastDropdownLines = 0;
+
+if (rl._refreshLine) {
+  rl._refreshLine = function() {
+    // Clear previous dropdown before drawing new line
+    if (lastDropdownLines > 0) {
+      readline.moveCursor(process.stdout, 0, 1);
+      readline.clearScreenDown(process.stdout);
+      readline.moveCursor(process.stdout, 0, -1);
+      lastDropdownLines = 0;
+    }
+
+    originalRefresh();
+    
+    const line = this.line;
+    if (!line || line.length === 0) return;
+
+    const matches = COMMANDS.filter(c => c.startsWith(line));
+
+    if (matches.length > 0 && this.cursor === line.length) {
+      const firstMatch = matches[0];
+      const ghost = firstMatch.slice(line.length);
+
+      // Print ghost text inline
+      process.stdout.write(chalk.gray(ghost));
+      readline.moveCursor(process.stdout, -ghost.length, 0);
+
+      // Print dropdown
+      const dropdownLines = Math.min(matches.length, 5);
+      process.stdout.write('\n');
+      
+      for (let i = 0; i < dropdownLines; i++) {
+        process.stdout.write('    ' + chalk.gray(matches[i]) + '\n');
+      }
+
+      lastDropdownLines = dropdownLines;
+      readline.moveCursor(process.stdout, 0, -(dropdownLines + 1));
+    }
+  };
+}
+```
+
+### How it works
+
+<Steps>
+  <Step title="Clear previous dropdown">
+    Before redrawing, move the cursor down and clear any existing dropdown suggestions to prevent visual artifacts.
+  </Step>
+  
+  <Step title="Call original refresh">
+    Execute the original `_refreshLine` function to maintain readline's core functionality.
+  </Step>
+  
+  <Step title="Check for matches">
+    Filter the command list to find all commands that start with the current input.
+  </Step>
+  
+  <Step title="Draw ghost text">
+    If matches exist and the cursor is at the end of the line, extract the remaining characters from the first match and display them in gray using `chalk.gray()`.
+  </Step>
+  
+  <Step title="Draw dropdown">
+    Print up to 5 matching commands below the prompt line, each indented and colored gray.
+  </Step>
+  
+  <Step title="Restore cursor position">
+    Move the cursor back to the correct position so typing continues naturally.
+  </Step>
+</Steps>
+
+## Cleaning up on Enter
+
+When you press Enter, the dropdown needs to be cleared before the command executes:
+
+```javascript app.js
+process.stdin.on('keypress', (str, key) => {
+  if (key && key.name === 'return' && lastDropdownLines > 0) {
+    readline.moveCursor(process.stdout, 0, 1);
+    readline.clearScreenDown(process.stdout);
+    readline.moveCursor(process.stdout, 0, -1);
+    lastDropdownLines = 0;
+  }
+});
+```
+
+This keypress listener detects the Return key and clears the dropdown before the line is processed.
+
+## Adding custom commands
+
+To add your own commands to the autocomplete system, simply update the `COMMANDS` array:
+
+```javascript app.js
+const COMMANDS = [
+  '/help',
+  '/clear', 
+  '/version',
+  '/about',
+  '/exit',
+  '/quit',
+  // Add your custom commands here
+  '/tasks',
+  '/habits',
+  '/notes'
+];
+```
+
+The autocomplete system will automatically include them in the filtering and suggestions.
+
+## Limitations
+
+- The dropdown shows a maximum of 5 suggestions to avoid cluttering the screen
+- Ghost text only appears when the cursor is at the end of the line
+- Commands must be added to the `COMMANDS` array to be autocompleted

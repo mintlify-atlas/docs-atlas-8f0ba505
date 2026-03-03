@@ -1,0 +1,203 @@
+---
+title: Technical architecture
+description: Deep dive into OMNI's technical implementation including readline interface, command routing, and color interpolation system
+---
+
+OMNI is built with Node.js and leverages the native `readline` module for interactive command-line interfaces. This page explores the core technical components that power the CLI.
+
+## Core modules
+
+The application is structured into three main modules:
+
+- **index.js** - Entry point that bootstraps the application
+- **app.js** - Command routing, readline setup, and autocomplete logic
+- **screen.js** - Display functions and color interpolation system
+
+## Readline interface
+
+OMNI uses Node.js's built-in `readline` module to create an interactive REPL (Read-Eval-Print Loop). The interface is initialized in `app.js:48-56`:
+
+```javascript
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  prompt: PROMPT,
+  completer: (line) => {
+    const hits = COMMANDS.filter((c) => c.startsWith(line));
+    return [hits.length ? hits : COMMANDS, line];
+  }
+});
+```
+
+The `completer` function provides tab-completion for commands. When a user presses Tab, readline calls this function with the current line and expects an array containing matching commands and the original input.
+
+### Custom refresh logic
+
+OMNI implements a custom `_refreshLine` function to display ghost text and a dropdown of matching commands as you type. This override starts at `app.js:58`:
+
+```javascript
+const originalRefresh = rl._refreshLine ? rl._refreshLine.bind(rl) : () => {};
+
+let lastDropdownLines = 0;
+
+if (rl._refreshLine) {
+  rl._refreshLine = function() {
+    // Clear previous dropdown before drawing new line
+    if (lastDropdownLines > 0) {
+      readline.moveCursor(process.stdout, 0, 1);
+      readline.clearScreenDown(process.stdout);
+      readline.moveCursor(process.stdout, 0, -1);
+      lastDropdownLines = 0;
+    }
+
+    originalRefresh();
+    
+    const line = this.line;
+    if (!line || line.length === 0) return;
+
+    const matches = COMMANDS.filter(c => c.startsWith(line));
+
+    if (matches.length > 0 && this.cursor === line.length) {
+      const firstMatch = matches[0];
+      const ghost = firstMatch.slice(line.length);
+
+      // Print ghost text inline
+      process.stdout.write(chalk.gray(ghost));
+      readline.moveCursor(process.stdout, -ghost.length, 0);
+
+      // Print dropdown
+      const dropdownLines = Math.min(matches.length, 5);
+      process.stdout.write('\n');
+      
+      for (let i = 0; i < dropdownLines; i++) {
+        process.stdout.write('    ' + chalk.gray(matches[i]) + '\n');
+      }
+
+      lastDropdownLines = dropdownLines;
+      readline.moveCursor(process.stdout, 0, -(dropdownLines + 1));
+    }
+  };
+}
+```
+
+This function:
+1. Clears any previous dropdown suggestions
+2. Calls the original refresh to redraw the prompt and input
+3. Filters commands that match the current input
+4. Displays ghost text (grayed out completion) after the cursor
+5. Renders a dropdown with up to 5 matching commands
+6. Repositions the cursor back to the input line
+
+### Keypress handling
+
+To prevent visual artifacts when the user presses Enter, OMNI intercepts the `return` keypress and clears the dropdown before the newline is printed (`app.js:102-109`):
+
+```javascript
+process.stdin.on('keypress', (str, key) => {
+  if (key && key.name === 'return' && lastDropdownLines > 0) {
+    readline.moveCursor(process.stdout, 0, 1);
+    readline.clearScreenDown(process.stdout);
+    readline.moveCursor(process.stdout, 0, -1);
+    lastDropdownLines = 0;
+  }
+});
+```
+
+## Command routing system
+
+The command router is implemented in the `handleCommand` function (`app.js:16-43`). It uses a simple switch statement to dispatch commands:
+
+```javascript
+function handleCommand(input) {
+  const cmd = input.trim().toLowerCase();
+
+  if (!cmd) return true;
+
+  switch (cmd) {
+    case '/help':
+      printHelp();
+      return true;
+    case '/clear':
+      printWelcome();
+      return true;
+    case '/version':
+      printVersion();
+      return true;
+    case '/about':
+      printAbout();
+      return true;
+    case '/exit':
+    case '/quit':
+    case '/q':
+      printGoodbye();
+      return false;
+    default:
+      printUnknown(cmd);
+      return true;
+  }
+}
+```
+
+The function returns a boolean indicating whether the REPL should continue:
+- `true` - Keep the CLI running and prompt for the next command
+- `false` - Exit the application
+
+This return value is used in the readline `line` event handler:
+
+```javascript
+rl.on('line', (line) => {
+  const keepRunning = handleCommand(line);
+  if (keepRunning) {
+    rl.prompt();
+  } else {
+    rl.close();
+  }
+});
+```
+
+## Color interpolation
+
+OMNI's welcome screen features a gradient effect created by interpolating between two RGB colors. The interpolation logic is in `screen.js:15-21`:
+
+```javascript
+function interpolateColor(color1, color2, factor) {
+  const result = color1.slice();
+  for (let i = 0; i < 3; i++) {
+    result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+  }
+  return result;
+}
+```
+
+This function takes two RGB color arrays and a factor (0 to 1) representing the position between the two colors. It linearly interpolates each color channel (R, G, B) and returns the resulting color.
+
+The gradient is applied in `printWelcome` (`screen.js:26-38`):
+
+```javascript
+const cosmicPurple = [138, 43, 226]; // deep purple
+const cosmicCyan = [0, 255, 255];    // bright cyan
+
+function printWelcome() {
+  console.clear();
+  
+  LOGO_LINES.forEach((line, index) => {
+    const factor = LOGO_LINES.length > 1 ? index / (LOGO_LINES.length - 1) : 0;
+    const [r, g, b] = interpolateColor(cosmicPurple, cosmicCyan, factor);
+    console.log(chalk.rgb(r, g, b).bold(line));
+  });
+  
+  // ... rest of welcome text
+}
+```
+
+Each line of the logo is printed with a progressively different color, creating a smooth gradient from cosmic purple at the top to bright cyan at the bottom.
+
+## Prompt styling
+
+The command prompt uses Chalk's RGB functionality to match the cosmic theme:
+
+```javascript
+const PROMPT = chalk.rgb(138, 43, 226)('  omni > ');
+```
+
+This creates a purple-colored prompt that's consistent with the OMNI branding.

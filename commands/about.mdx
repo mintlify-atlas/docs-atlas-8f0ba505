@@ -1,0 +1,105 @@
+---
+title: /about command
+description: Learn what OMNI is and discover how The Everything CLI can help you operate your life from the terminal
+---
+
+## Overview
+
+The `/about` command displays information about OMNI's mission and purpose — what it is, what it aims to do, and who it's built for.
+
+## Usage
+
+```bash
+omni > /about
+```
+
+No arguments or flags are needed — just type the command and press Enter.
+
+## Output
+
+When you run `/about`, you'll see:
+
+```bash
+omni > /about
+
+  The EVERYTHING CLI
+  One terminal to run your entire life.
+  Tasks, notes, finances, habits — all from right here.
+  Built for people who live in the terminal.
+```
+
+The output explains OMNI's vision: a unified terminal interface for managing all aspects of your life.
+
+## What OMNI is
+
+OMNI (The Everything CLI) is designed to be your central hub for:
+
+- **Tasks** — Track todos, projects, and deadlines
+- **Notes** — Capture ideas and information
+- **Finances** — Monitor spending and budgets
+- **Habits** — Build and maintain positive routines
+
+All accessible from one terminal interface, designed for people who prefer the command line over graphical applications.
+
+<Tip>
+  OMNI follows the Unix philosophy: do one thing (provide a terminal interface for life management) and do it well.
+</Tip>
+
+## Philosophy
+
+OMNI is built on the belief that:
+
+- The terminal is the most efficient interface for power users
+- Context switching between multiple apps slows you down
+- Command-line tools should be fast, focused, and beautiful
+- Your data should be accessible where you already spend your time
+
+## Who OMNI is for
+
+OMNI is perfect for you if you:
+
+- Spend most of your day in the terminal
+- Prefer keyboard-driven workflows
+- Want to manage your life without leaving your development environment
+- Appreciate well-designed CLI tools
+- Value speed and efficiency over graphical interfaces
+
+<Note>
+  While OMNI is currently in early development (v0.1.0), the vision is to create a comprehensive life management system entirely within the terminal.
+</Note>
+
+## Implementation details
+
+The `/about` command is implemented in src/app.js:31-33:
+
+```javascript
+case '/about':
+  printAbout();
+  return true;
+```
+
+The `printAbout` function (src/screen.js:52-58) displays the formatted message:
+
+```javascript
+function printAbout() {
+  console.log('');
+  console.log(chalk.cyan.bold('  The EVERYTHING CLI'));
+  console.log(chalk.gray('  One terminal to run your entire life.'));
+  console.log(chalk.gray('  Tasks, notes, finances, habits — all from right here.'));
+  console.log(chalk.gray('  Built for people who live in the terminal.\n'));
+}
+```
+
+The message uses:
+- Cyan, bold text for the title
+- Gray text for the descriptive content
+- Careful spacing for visual clarity
+
+## The name "OMNI"
+
+The name OMNI comes from the Latin prefix meaning "all" or "every" — reflecting the tool's ambition to be your everything CLI for life management.
+
+## Related commands
+
+- [/version](/commands/version) — Check which version of OMNI you're running
+- [/help](/commands/help) — See all available commands

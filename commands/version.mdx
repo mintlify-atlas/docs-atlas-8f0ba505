@@ -1,0 +1,100 @@
+---
+title: /version command
+description: Check which version of OMNI you're currently running
+---
+
+## Overview
+
+The `/version` command displays the current version number of OMNI. This is useful for troubleshooting, checking for updates, or confirming you're running the expected version.
+
+## Usage
+
+```bash
+omni > /version
+```
+
+No arguments or flags are needed — just type the command and press Enter.
+
+## Output
+
+When you run `/version`, you'll see:
+
+```bash
+omni > /version
+
+  omni v0.1.0
+```
+
+The version number is displayed in a simple, clean format with the `v` prefix.
+
+## Version format
+
+OMNI uses [Semantic Versioning](https://semver.org/) (semver) with the format:
+
+```
+MAJOR.MINOR.PATCH
+```
+
+- **MAJOR** version — Incompatible API changes
+- **MINOR** version — New functionality in a backwards-compatible manner
+- **PATCH** version — Backwards-compatible bug fixes
+
+<Tip>
+  The version number is read directly from the `package.json` file, ensuring it's always accurate and in sync with the published release.
+</Tip>
+
+## When to use /version
+
+Use the `/version` command when you:
+
+- Need to report which version you're using when filing a bug report
+- Want to verify you've successfully updated to a new version
+- Are following documentation that's specific to a certain version
+- Need to check compatibility with plugins or extensions
+
+## Implementation details
+
+The `/version` command is implemented in src/app.js:28-30:
+
+```javascript
+case '/version':
+  printVersion();
+  return true;
+```
+
+The `printVersion` function (src/screen.js:60-63) reads the version from `package.json`:
+
+```javascript
+function printVersion() {
+  const { version } = require('../package.json');
+  console.log(chalk.gray(`\n  omni v${version}\n`));
+}
+```
+
+This implementation ensures:
+- The version is always current (read dynamically from package.json)
+- The output is consistently formatted
+- The version is displayed in gray for a subtle, non-intrusive appearance
+
+<Note>
+  The version in your terminal will match the version field in the package.json file at the root of the OMNI project.
+</Note>
+
+## Checking for updates
+
+While the `/version` command tells you which version you're running, it doesn't check for updates. To see if a newer version is available:
+
+```bash
+npm outdated -g the-everything-cli
+```
+
+Or update to the latest version:
+
+```bash
+npm update -g the-everything-cli
+```
+
+## Related commands
+
+- [/about](/commands/about) — Learn more about what OMNI is and what it can do
+- [/help](/commands/help) — See all available commands

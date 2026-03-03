@@ -1,0 +1,215 @@
+---
+title: Customization
+description: Customize OMNI's appearance with custom colors, gradients, and prompt styling
+---
+
+OMNI uses the `chalk` library for terminal styling, giving you full control over colors, gradients, and text formatting throughout the CLI.
+
+## Color system
+
+OMNI's visual identity is built around a cosmic color palette that creates a purple-to-cyan gradient effect.
+
+### Core colors
+
+The two primary colors are defined in `screen.js`:
+
+```javascript screen.js
+const cosmicPurple = [138, 43, 226]; // deep purple
+const cosmicCyan = [0, 255, 255];    // bright cyan
+```
+
+These RGB values create OMNI's signature cosmic aesthetic:
+- **Cosmic Purple** — A deep, vibrant purple (`rgb(138, 43, 226)`)
+- **Cosmic Cyan** — A bright cyan (`rgb(0, 255, 255)`)
+
+### Gradient interpolation
+
+OMNI uses color interpolation to create smooth gradients across multi-line output:
+
+```javascript screen.js
+function interpolateColor(color1, color2, factor) {
+  const result = color1.slice();
+  for (let i = 0; i < 3; i++) {
+    result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+  }
+  return result;
+}
+```
+
+This function:
+- Takes two RGB colors and a factor between 0 and 1
+- Calculates intermediate RGB values for smooth transitions
+- Returns a new RGB array representing the blended color
+
+## Customizing the welcome screen
+
+The welcome screen displays the OMNI logo with a gradient effect:
+
+```javascript screen.js
+function printWelcome() {
+  console.clear();
+  
+  LOGO_LINES.forEach((line, index) => {
+    const factor = LOGO_LINES.length > 1 ? index / (LOGO_LINES.length - 1) : 0;
+    const [r, g, b] = interpolateColor(cosmicPurple, cosmicCyan, factor);
+    console.log(chalk.rgb(r, g, b).bold(line));
+  });
+
+  console.log(chalk.gray('  Operate your life through the command line.\n'));
+  console.log(chalk.gray('  Type ') + chalk.white('/help') + chalk.gray(' to see available commands.'));
+  console.log(chalk.gray('  Type ') + chalk.white('/exit') + chalk.gray(' to quit.\n'));
+}
+```
+
+Each line of the logo receives a different color based on its position, creating a smooth gradient from purple at the top to cyan at the bottom.
+
+## Customizing the prompt
+
+The command prompt is defined in `app.js` with a custom color:
+
+```javascript app.js
+const PROMPT = chalk.rgb(138, 43, 226)('  omni > ');
+```
+
+### Changing prompt colors
+
+You can customize the prompt with any chalk color method:
+
+<CodeGroup>
+```javascript Solid color
+const PROMPT = chalk.rgb(138, 43, 226)('  omni > ');
+```
+
+```javascript Hex color
+const PROMPT = chalk.hex('#8A2BE2')('  omni > ');
+```
+
+```javascript Named color
+const PROMPT = chalk.magenta.bold('  omni > ');
+```
+
+```javascript Multi-color
+const PROMPT = chalk.rgb(138, 43, 226)('  omni') + chalk.cyan(' > ');
+```
+</CodeGroup>
+
+## Text styling options
+
+Chalk provides various styling methods you can use throughout OMNI:
+
+### Colors
+
+```javascript
+chalk.rgb(r, g, b)('text')     // RGB values
+chalk.hex('#8A2BE2')('text')    // Hex color
+chalk.cyan('text')              // Named color
+chalk.gray('text')              // Gray text
+chalk.white('text')             // White text
+```
+
+### Modifiers
+
+```javascript
+chalk.bold('text')              // Bold
+chalk.dim('text')               // Dim/faded
+chalk.italic('text')            // Italic
+chalk.underline('text')         // Underlined
+```
+
+### Combining styles
+
+```javascript
+chalk.cyan.bold('text')                    // Cyan and bold
+chalk.rgb(138, 43, 226).underline('text')  // Custom color and underlined
+```
+
+## Customizing screen output
+
+You can modify any of the screen functions in `screen.js` to match your preferences.
+
+### Help menu styling
+
+```javascript screen.js
+function printHelp() {
+  console.log('');
+  console.log(chalk.cyan.bold('  Available commands:'));
+  console.log('');
+  console.log(chalk.white('  /help    ') + chalk.gray('— Show this help menu'));
+  console.log(chalk.white('  /clear   ') + chalk.gray('— Clear the screen'));
+  console.log(chalk.white('  /version ') + chalk.gray('— Show current version'));
+  console.log(chalk.white('  /about   ') + chalk.gray('— What is OMNI?'));
+  console.log(chalk.white('  /exit    ') + chalk.gray('— Quit the CLI'));
+  console.log('');
+}
+```
+
+Command names use `chalk.white()` for emphasis, while descriptions use `chalk.gray()` for a subtle appearance.
+
+### Error messages
+
+```javascript screen.js
+function printUnknown(cmd) {
+  console.log(chalk.red(`\n  Unknown command: "${cmd}"`));
+  console.log(chalk.gray('  Type ') + chalk.white('/help') + chalk.gray(' to see available commands.\n'));
+}
+```
+
+Error messages use `chalk.red()` to grab attention.
+
+## Creating custom themes
+
+You can create themed color schemes by defining color palettes:
+
+<CodeGroup>
+```javascript Cosmic (default)
+const theme = {
+  primary: [138, 43, 226],
+  secondary: [0, 255, 255],
+  text: 'white',
+  subtle: 'gray',
+  error: 'red'
+};
+```
+
+```javascript Forest
+const theme = {
+  primary: [34, 139, 34],
+  secondary: [144, 238, 144],
+  text: 'green',
+  subtle: 'gray',
+  error: 'red'
+};
+```
+
+```javascript Ocean
+const theme = {
+  primary: [0, 105, 148],
+  secondary: [72, 209, 204],
+  text: 'cyan',
+  subtle: 'gray',
+  error: 'red'
+};
+```
+
+```javascript Sunset
+const theme = {
+  primary: [255, 99, 71],
+  secondary: [255, 215, 0],
+  text: 'yellow',
+  subtle: 'gray',
+  error: 'red'
+};
+```
+</CodeGroup>
+
+To apply a theme, replace the color values in `screen.js` and update the prompt in `app.js`.
+
+## Testing color changes
+
+After making customization changes, test them by running:
+
+```bash
+node src/index.js
+```
+
+You'll immediately see your color and styling changes reflected in the CLI.

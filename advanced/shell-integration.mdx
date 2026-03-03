@@ -1,0 +1,327 @@
+---
+title: Shell integration
+description: Set up shell completions, aliases, and global access to make OMNI instantly available in your terminal
+---
+
+Integrate OMNI with your shell to make it accessible from anywhere in your terminal. This guide covers installation, shell completion, and useful aliases.
+
+## Global installation
+
+To make the `omni` command available globally, install the package with npm:
+
+<Steps>
+  <Step title="Install globally">
+    Run the global installation command:
+    ```bash
+    npm install -g the-everything-cli
+    ```
+  </Step>
+  
+  <Step title="Verify installation">
+    Check that the command is available:
+    ```bash
+    omni
+    ```
+    You should see the OMNI welcome screen.
+  </Step>
+</Steps>
+
+### Local installation
+
+If you prefer to run OMNI without installing globally:
+
+```bash
+npm install the-everything-cli
+npx omni
+```
+
+## Setting up shell completions
+
+OMNI's autocomplete works automatically within the CLI, but you can enhance your shell to provide completions before you even launch OMNI.
+
+### Bash completion
+
+Add this to your `~/.bashrc` or `~/.bash_profile`:
+
+```bash ~/.bashrc
+# OMNI shell completions
+_omni_completions() {
+  local cur prev commands
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  commands="/help /clear /version /about /exit /quit"
+
+  if [[ ${prev} == omni ]]; then
+    COMPREPLY=($(compgen -W "${commands}" -- ${cur}))
+    return 0
+  fi
+}
+
+complete -F _omni_completions omni
+```
+
+Reload your shell:
+
+```bash
+source ~/.bashrc
+```
+
+### Zsh completion
+
+Add this to your `~/.zshrc`:
+
+```zsh ~/.zshrc
+# OMNI shell completions
+_omni() {
+  local -a commands
+  commands=(
+    '/help:Show help menu'
+    '/clear:Clear the screen'
+    '/version:Show version'
+    '/about:About OMNI'
+    '/exit:Exit the CLI'
+    '/quit:Exit the CLI'
+  )
+  _describe 'command' commands
+}
+
+compdef _omni omni
+```
+
+Reload your shell:
+
+```bash
+source ~/.zshrc
+```
+
+### Fish completion
+
+Create a completion file at `~/.config/fish/completions/omni.fish`:
+
+```fish ~/.config/fish/completions/omni.fish
+# OMNI completions for fish
+complete -c omni -f -a '/help' -d 'Show help menu'
+complete -c omni -f -a '/clear' -d 'Clear the screen'
+complete -c omni -f -a '/version' -d 'Show version'
+complete -c omni -f -a '/about' -d 'About OMNI'
+complete -c omni -f -a '/exit' -d 'Exit the CLI'
+complete -c omni -f -a '/quit' -d 'Exit the CLI'
+```
+
+Completions will be available immediately in new fish sessions.
+
+## Useful aliases
+
+Create shortcuts to launch OMNI or execute common commands quickly.
+
+### Bash/Zsh aliases
+
+Add to `~/.bashrc` or `~/.zshrc`:
+
+<CodeGroup>
+```bash Launch shortcuts
+alias o='omni'
+alias om='omni'
+```
+
+```bash Direct commands
+alias omni-help='omni /help'
+alias omni-version='omni /version'
+```
+
+```bash Quick access
+alias life='omni'
+alias cli='omni'
+```
+</CodeGroup>
+
+### Fish aliases
+
+Add to `~/.config/fish/config.fish`:
+
+```fish ~/.config/fish/config.fish
+# OMNI aliases
+alias o='omni'
+alias om='omni'
+alias life='omni'
+```
+
+## Making OMNI executable directly
+
+The `package.json` defines the binary entry point:
+
+```json package.json
+{
+  "name": "the-everything-cli",
+  "version": "0.1.0",
+  "bin": {
+    "omni": "./src/index.js"
+  }
+}
+```
+
+The `index.js` file includes a shebang line that makes it executable:
+
+```javascript src/index.js
+#!/usr/bin/env node
+
+const { startApp } = require('./app');
+
+startApp();
+```
+
+This shebang (`#!/usr/bin/env node`) tells your system to run the file with Node.js.
+
+## Development setup
+
+If you're developing OMNI locally and want to test it as a global command:
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone <repository-url>
+    cd the-everything-cli
+    ```
+  </Step>
+  
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+  
+  <Step title="Link globally">
+    Create a symlink to make the local version available globally:
+    ```bash
+    npm link
+    ```
+  </Step>
+  
+  <Step title="Test the command">
+    The `omni` command now points to your local development version:
+    ```bash
+    omni
+    ```
+  </Step>
+</Steps>
+
+### Unlinking
+
+To remove the global symlink:
+
+```bash
+npm unlink -g the-everything-cli
+```
+
+## Adding OMNI to your PATH
+
+If you want to run OMNI without installing it globally, add the source directory to your PATH:
+
+### Bash/Zsh
+
+Add to `~/.bashrc` or `~/.zshrc`:
+
+```bash
+export PATH="$PATH:/path/to/the-everything-cli/src"
+```
+
+### Fish
+
+Add to `~/.config/fish/config.fish`:
+
+```fish
+set -gx PATH $PATH /path/to/the-everything-cli/src
+```
+
+Make sure `src/index.js` is executable:
+
+```bash
+chmod +x /path/to/the-everything-cli/src/index.js
+```
+
+## Auto-launch OMNI on terminal startup
+
+To automatically launch OMNI when you open a new terminal:
+
+<CodeGroup>
+```bash ~/.bashrc
+# Auto-launch OMNI
+if [[ $- == *i* ]]; then
+  omni
+fi
+```
+
+```zsh ~/.zshrc
+# Auto-launch OMNI
+if [[ -o interactive ]]; then
+  omni
+fi
+```
+
+```fish ~/.config/fish/config.fish
+# Auto-launch OMNI
+if status is-interactive
+  omni
+end
+```
+</CodeGroup>
+
+## Environment variables
+
+You can configure OMNI behavior with environment variables:
+
+```bash
+# Disable colors (useful for piping output)
+export NO_COLOR=1
+
+# Force color output
+export FORCE_COLOR=1
+```
+
+The `chalk` library respects these standard environment variables automatically.
+
+## Troubleshooting
+
+### Command not found
+
+If `omni` is not recognized after global installation:
+
+1. Check your npm global bin directory:
+   ```bash
+   npm config get prefix
+   ```
+
+2. Ensure this directory is in your PATH:
+   ```bash
+   echo $PATH
+   ```
+
+3. Add npm's global bin to your PATH if needed:
+   ```bash
+   export PATH="$PATH:$(npm config get prefix)/bin"
+   ```
+
+### Permission denied
+
+If you get permission errors during global installation:
+
+```bash
+sudo npm install -g the-everything-cli
+```
+
+Or configure npm to use a different directory that doesn't require sudo.
+
+### Completions not working
+
+Make sure you've reloaded your shell configuration after adding completion scripts:
+
+```bash
+# Bash
+source ~/.bashrc
+
+# Zsh
+source ~/.zshrc
+
+# Fish (open new terminal or run)
+source ~/.config/fish/config.fish
+```
