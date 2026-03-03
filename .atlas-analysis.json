@@ -1,0 +1,87 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "The Everything CLI (OMNI)",
+  "projectDescription": "A unified terminal interface to manage your entire life - tasks, notes, finances, habits, and more - all from the command line.",
+  "theme": "aspen",
+  "primaryColor": "#8A2BE2",
+  "lightColor": "#00FFFF",
+  "darkColor": "#6A1BB2",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/overview",
+              "concepts/philosophy",
+              "concepts/architecture"
+            ]
+          },
+          {
+            "group": "Command Reference",
+            "pages": [
+              "commands/overview",
+              "commands/help",
+              "commands/clear",
+              "commands/version",
+              "commands/about",
+              "commands/exit"
+            ]
+          },
+          {
+            "group": "Advanced Usage",
+            "pages": [
+              "advanced/autocomplete",
+              "advanced/customization",
+              "advanced/shell-integration"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Development",
+        "groups": [
+          {
+            "group": "Roadmap",
+            "pages": [
+              "roadmap/features",
+              "roadmap/contributing"
+            ]
+          },
+          {
+            "group": "Technical",
+            "pages": [
+              "technical/architecture",
+              "technical/extending"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Interactive command-line interface with autocomplete",
+    "Command routing system with slash-based commands",
+    "Colorized terminal output with gradient styling",
+    "Built-in help and documentation system",
+    "Extensible architecture for future productivity features"
+  ],
+  "publicApiSurface": [
+    "/help - Display available commands",
+    "/clear - Clear the terminal screen",
+    "/version - Show current version",
+    "/about - Display information about OMNI",
+    "/exit - Quit the application",
+    "omni - Main CLI executable"
+  ]
+}
